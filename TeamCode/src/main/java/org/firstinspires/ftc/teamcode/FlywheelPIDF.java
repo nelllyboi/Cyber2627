@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -11,9 +12,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
  * Closed-loop flywheel controller: PID + feedforward (kS, kV, kA).
  *
  * Ported from the decode-2025-26 flywheel controller for Cyber2627.
- * Dashboard / @Configurable annotations were removed so this compiles against
- * the stock FTC SDK with no extra gradle dependencies. Tune the public static
- * gains below directly in code.
+ * All public static gains below show up in FTC Dashboard's Configuration tab
+ * (under FlywheelPIDF) and can be edited live while the flywheel runs.
+ * Copy final values back into the code so they survive an app restart.
  *
  * Feedforward meaning:
  *   kS = static power: the minimum power needed to overcome friction and start moving
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
  *
  * Supports one or two flywheel motors (dual motors run at the same power).
  */
+@Config
 public class FlywheelPIDF {
 
     private static final double MAX_INTEGRAL_SUM = 100;
@@ -47,14 +49,14 @@ public class FlywheelPIDF {
     private double lastReferenceRPM = 0;
 
     // PID gains
-    public static double kP = 0.4;
+    public static double kP = 0.002;
     public static double kI = 0.0;
     public static double kD = 0.0;
 
     // Feedforward gains
     public static double kS = 0.0869777521;   // static friction (power)
     public static double kV = 0.000178;       // velocity feedforward (power / RPM)
-    public static double kA = 10;             // acceleration feedforward (power / RPM/s)
+    public static double kA = 0;              // acceleration feedforward (per-loop change in target RPM)
 
     /** Dual-motor flywheel. */
     public FlywheelPIDF(HardwareMap hardwareMap, DcMotorEx motor, DcMotorEx motor2) {
