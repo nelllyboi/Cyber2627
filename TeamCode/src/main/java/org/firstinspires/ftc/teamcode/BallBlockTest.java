@@ -23,8 +23,8 @@ public class BallBlockTest extends OpMode {
     public static final String BALL_BLOCK_NAME = "ballBlock";
 
     // --- Saved positions used by TeleOpTest ---
-    public static double BLOCK_MIN = 0.6;   // open position
-    public static double BLOCK_MAX = 0.85;   // blocking position
+    public static double BLOCK_MIN = 0.34;   // blocking position
+    public static double BLOCK_MAX = 0.5;   // open position
 
     // --- Live tuning position (edit in Dashboard) ---
     public static double BALL_BLOCK_POS = 0.0;

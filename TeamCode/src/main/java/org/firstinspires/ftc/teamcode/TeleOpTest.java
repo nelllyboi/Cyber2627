@@ -37,7 +37,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  *   A            - toggle flywheel on/off
  *   B            - toggle both transfer motors on/off
  *   X            - toggle intake motor on/off
- *   Y            - toggle ball block (MIN <-> MAX)
+ *   Dpad Left    - ball block BLOCKING (BallBlockTest.BLOCK_MIN)
+ *   Dpad Right   - ball block OPEN     (BallBlockTest.BLOCK_MAX)
  *   Dpad Up/Down - raise / lower target RPM by RPM_STEP
  */
 @TeleOp(name = "TeleOp", group = "Test")
@@ -69,13 +70,12 @@ public class TeleOpTest extends LinearOpMode {
     private boolean flywheelOn = false;
     private boolean transferOn = false;
     private boolean intakeOn = false;
-    private boolean blockOn = false;
+    private double blockPos = BallBlockTest.BLOCK_MAX;  // start open
 
     // Rising-edge state
     private boolean aPressed = false;
     private boolean bPressed = false;
     private boolean xPressed = false;
-    private boolean yPressed = false;
     private boolean dUPressed = false;
     private boolean dDPressed = false;
 
@@ -98,14 +98,15 @@ public class TeleOpTest extends LinearOpMode {
         transfer2 = hardwareMap.get(DcMotorEx.class, TRANSFER2_NAME);
         transfer2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        // Note: moving a servo in INIT breaks G403 in a match. Fine for this test OpMode.
         ballBlock = hardwareMap.get(Servo.class, BALL_BLOCK_NAME);
-        ballBlock.setPosition(BallBlockTest.BLOCK_MIN);
+        ballBlock.setPosition(blockPos);
 
         // Single-motor flywheel. For a dual-motor flywheel, fetch a second
         // DcMotorEx and use: new FlywheelPIDF(hardwareMap, flywheelMotor, flywheelMotor2);
         flywheelPID = new FlywheelPIDF(hardwareMap, flywheelMotor);
 
-        telemetry.addLine("Ready. A = flywheel, B = transfer, X = intake, Y = ball block, Dpad = RPM.");
+        telemetry.addLine("Ready. A = flywheel, B = transfer, X = intake, Dpad Left = block, Dpad Right = open, Dpad = RPM.");
         telemetry.update();
 
         waitForStart();
@@ -130,8 +131,8 @@ public class TeleOpTest extends LinearOpMode {
                 intake.setPower(0);
             }
 
-            // Ball block servo (MAX = blocking, MIN = open)
-            ballBlock.setPosition(blockOn ? BallBlockTest.BLOCK_MAX : BallBlockTest.BLOCK_MIN);
+            // Ball block servo
+            ballBlock.setPosition(blockPos);
 
             // A: toggle flywheel
             if (gamepad1.a) {
@@ -163,14 +164,11 @@ public class TeleOpTest extends LinearOpMode {
                 xPressed = false;
             }
 
-            // Y: toggle ball block
-            if (gamepad1.y) {
-                if (!yPressed) {
-                    blockOn = !blockOn;
-                    yPressed = true;
-                }
-            } else {
-                yPressed = false;
+            // Dpad left: ball block blocking, dpad right: ball block open
+            if (gamepad1.dpad_left) {
+                blockPos = BallBlockTest.BLOCK_MIN;
+            } else if (gamepad1.dpad_right) {
+                blockPos = BallBlockTest.BLOCK_MAX;
             }
 
             // Dpad up: raise target RPM
@@ -211,11 +209,12 @@ public class TeleOpTest extends LinearOpMode {
             telemetry.addData("Flywheel Current (A)", "%.2f", flywheelPID.getCurrent());
             telemetry.addData("Transfer (both)", transferOn ? "ON" : "OFF");
             telemetry.addData("Intake", intakeOn ? "ON" : "OFF");
-            telemetry.addData("Ball Block", blockOn ? "BLOCKING" : "OPEN");
+            telemetry.addData("Ball Block", blockPos == BallBlockTest.BLOCK_MIN ? "BLOCKING" : "OPEN");
+            telemetry.addData("Ball Block Pos", blockPos);
             telemetry.addData("kS", FlywheelPIDF.kS);
             telemetry.addData("kV", FlywheelPIDF.kV);
             telemetry.addData("kA", FlywheelPIDF.kA);
-            telemetry.addLine("A=Flywheel  B=Transfer  X=Intake  Y=Block  Dpad Up/Down=RPM");
+            telemetry.addLine("A=Flywheel  B=Transfer  X=Intake  DpadL=Block  DpadR=Open  Dpad Up/Down=RPM");
             telemetry.update();
         }
 
@@ -223,6 +222,5 @@ public class TeleOpTest extends LinearOpMode {
         intake.setPower(0);
         transfer.setPower(0);
         transfer2.setPower(0);
-        ballBlock.setPosition(BallBlockTest.BLOCK_MIN);
     }
 }
