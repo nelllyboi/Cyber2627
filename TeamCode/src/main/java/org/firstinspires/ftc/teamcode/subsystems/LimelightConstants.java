@@ -20,11 +20,14 @@ public class LimelightConstants {
     // --- Hardware / pipeline (final, not shown in Dashboard) ---
     public static final String LIMELIGHT_NAME = "limelight"; // must match the Driver Station config
     // The pipeline itself is set up in the Limelight web UI, not here:
-    //   family 36h11, marker size 82.55 mm (NOT 101.6), full 3D turned ON.
-    // A wrong marker size scales every 3D distance by the same error.
-    // "AprilTag size mismatch" in the web UI means the uploaded field map (.fmap) lists
-    // a different size (Limelight's sample FRC maps use 165.1 mm). Our tags are 82.55 mm,
-    // so remove that map or upload one with 82.55 mm tags. Don't change the marker size to 165.1.
+    //   family 36h11, marker size 101.6 mm, full 3D turned ON.
+    // The tags are really 82.55 mm (3.25 in), but 101.6 is what gave correct distances
+    // on our robot in testing (82.55 read short, 165.1 read long). Treat it as a
+    // calibration value: if distances drift, re-check against a tape measure
+    // (floor, from under the lens to under the tag center) before changing it.
+    // The marker size scales every 3D distance by the same factor.
+    // "AprilTag size mismatch" in the web UI just means the uploaded field map (.fmap)
+    // lists a different size. Our code doesn't use the field map, so it can be ignored.
     public static final int PIPELINE_INDEX    = 0;           // AprilTag (Fiducial) pipeline
     public static final int POLL_RATE_HZ      = 100;         // how often the SDK asks the Limelight for data
 
