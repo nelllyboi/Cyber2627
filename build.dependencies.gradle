@@ -2,6 +2,8 @@ repositories {
     mavenCentral()
     google() // Needed for androidx
     maven { url = 'https://maven.brott.dev/' }
+    maven { url = 'https://mymaven.bylazar.com/releases' }  // Panels dashboard
+    maven { url = 'https://repo.dairy.foundation/releases' } // Sloth, needed by Panels
 }
 
 dependencies {
@@ -15,4 +17,5 @@ dependencies {
     implementation 'org.firstinspires.ftc:Vision:12.0.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.acmerobotics.dashboard:dashboard:0.5.1'
+    implementation 'com.bylazar:fullpanels:1.0.20' // Panels dashboard, http://192.168.43.1:8001
 }
