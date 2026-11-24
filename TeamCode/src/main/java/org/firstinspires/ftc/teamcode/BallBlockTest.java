@@ -14,6 +14,8 @@ import com.qualcomm.robotcore.hardware.Servo;
  * edit BALL_BLOCK_POS under BallBlockTest. The servo moves live. Find the open
  * position and the blocking position, then write them into BLOCK_MIN and
  * BLOCK_MAX below. TeleOpTest reads those two constants.
+ *
+ * Gamepad 1: A moves the servo to BUTTON_A_POS (0.47), B to BUTTON_B_POS (0.7).
  */
 @Config
 @TeleOp(name = "Ball Block Test", group = "Test")
@@ -26,7 +28,11 @@ public class BallBlockTest extends OpMode {
     public static double BLOCK_MIN = 0.34;   // blocking position
     public static double BLOCK_MAX = 0.5;   // open position
 
-    // --- Live tuning position (edit in Dashboard) ---
+    // --- Gamepad preset positions ---
+    public static double BUTTON_A_POS = 0.47;
+    public static double BUTTON_B_POS = 0.7;
+
+    // --- Live tuning position (edit in Dashboard, or set with A/B) ---
     public static double BALL_BLOCK_POS = 0.0;
 
     private Servo ballBlockServo;
@@ -41,6 +47,12 @@ public class BallBlockTest extends OpMode {
     @Override
     public void loop() {
         TelemetryPacket packet = new TelemetryPacket();
+
+        if (gamepad1.a) {
+            BALL_BLOCK_POS = BUTTON_A_POS;
+        } else if (gamepad1.b) {
+            BALL_BLOCK_POS = BUTTON_B_POS;
+        }
 
         ballBlockServo.setPosition(BALL_BLOCK_POS);
 
