@@ -21,10 +21,10 @@ public class Port0MotorTeleOp extends LinearOpMode {
     private static final String MOTOR_NAME = "port0Motor";
     private static final double MOTOR_POWER = 1.0; // start low; raise once verified
 
-    private static final String TRANSFER_MOTOR_NAME = "transferMotor";
+    private static final String TRANSFER_MOTOR_NAME = "transfer1";
     private static final double TRANSFER_POWER = 1.0;
 
-    private static final String INTAKE_MOTOR_NAME = "intakeMotor";
+    private static final String INTAKE_MOTOR_NAME = "intake";
     private static final double INTAKE_POWER = -1.0;
 
     @Override

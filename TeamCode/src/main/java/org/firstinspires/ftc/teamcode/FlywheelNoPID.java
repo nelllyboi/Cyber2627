@@ -22,9 +22,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
  *
  * Hardware config names (rename the constants below to match your Driver Station):
  *   "shooter"        - flywheel motor
- *   "transferMotor"  - transfer/feeder motor 1
- *   "transferMotor2" - transfer/feeder motor 2
- *   "intakeMotor"    - intake motor
+ *   "transfer1"  - transfer/feeder motor 1
+ *   "transfer2" - transfer/feeder motor 2
+ *   "intake"    - intake motor
  *   "ballBlock"      - ball block servo
  *
  * Controls (gamepad1):
@@ -39,9 +39,9 @@ public class FlywheelNoPID extends LinearOpMode {
 
     // --- Hardware config names ---
     private static final String FLYWHEEL_NAME  = "shooter";
-    private static final String TRANSFER_NAME  = "transferMotor";
-    private static final String TRANSFER2_NAME = "transferMotor2";
-    private static final String INTAKE_NAME    = "intakeMotor";
+    private static final String TRANSFER_NAME  = "transfer1";
+    private static final String TRANSFER2_NAME = "transfer2";
+    private static final String INTAKE_NAME    = "intake";
     private static final String BALL_BLOCK_NAME = BallBlockTest.BALL_BLOCK_NAME;
 
     // --- Tuning ---

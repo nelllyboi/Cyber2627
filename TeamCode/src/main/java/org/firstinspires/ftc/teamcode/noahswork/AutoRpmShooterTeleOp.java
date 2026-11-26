@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.noahswork;
 
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -29,21 +29,18 @@ import org.firstinspires.ftc.teamcode.subsystems.ShotTable;
  * If no tag has been seen yet, it uses NO_TARGET_RPM.
  *
  * ShotTable values are PLACEHOLDERS. Fill them in with real shots before relying on this.
- * Telemetry goes to the Driver Station and is mirrored to Panels (http://192.168.43.1:8001),
+ * Telemetry goes to the Driver Station and FTC Dashboard (http://192.168.43.1:8080/dash),
  * where targetRPM and currentRPM can be graphed.
  */
-@Configurable
+@Config
 @TeleOp(name = "Auto RPM Shooter", group = "Test")
 public class AutoRpmShooterTeleOp extends LinearOpMode {
 
-    // --- Tunables (shown in Panels' Configurables tab) ---
+    // --- Tunables (shown in FTC Dashboard's Configuration tab) ---
     public static double NO_TARGET_RPM = 1000;  // used until the first tag is seen
     public static double TRIM_STEP_RPM = 50;    // RPM change per dpad press
     public static double RPM_TOLERANCE = 100;   // within this of target = "AT SPEED", ok to feed
     public static double MAX_RPM       = 5000;  // safety cap on the target RPM
-
-    private TelemetryManager panels;
-    private boolean panelsWorking = true;
 
     @Override
     public void runOpMode() {
@@ -54,10 +51,9 @@ public class AutoRpmShooterTeleOp extends LinearOpMode {
 
         HiveVision vision = new HiveVision(hardwareMap, HiveVision.Alliance.ANY);
 
-        try {
-            panels = PanelsTelemetry.INSTANCE.getTelemetry();
-        } catch (Exception e) {
-            panelsWorking = false;
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        if (dashboard != null) {
+            telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         }
 
         boolean flywheelOn = false;
@@ -123,7 +119,7 @@ public class AutoRpmShooterTeleOp extends LinearOpMode {
             show("Motor power", String.format("%.2f", power));
             show("Flywheel current (A)", String.format("%.2f", flywheel.getCurrent()));
 
-            // For Panels' Graph widget
+            // Plain numbers so FTC Dashboard can graph them
             graph("targetRPM", targetRPM);
             graph("currentRPM", currentRPM);
             graph("distance", distance);
@@ -135,26 +131,19 @@ public class AutoRpmShooterTeleOp extends LinearOpMode {
         vision.stop();
     }
 
-    // --- Telemetry helpers: Driver Station first, Panels as an extra ---
+    // --- Telemetry helpers (Driver Station + FTC Dashboard) ---
 
     private void show(String caption, Object value) {
         telemetry.addData(caption, value);
-        if (panelsWorking) panels.addData(caption, value);
     }
 
+    /** A plain number for FTC Dashboard's graph, skipped when there is no reading (NaN). */
     private void graph(String name, double value) {
-        if (panelsWorking && !Double.isNaN(value)) panels.addData(name, value);
+        if (!Double.isNaN(value)) telemetry.addData(name, value);
     }
 
     private void sendTelemetry() {
         telemetry.update();
-        if (panelsWorking) {
-            try {
-                panels.update();
-            } catch (Exception e) {
-                panelsWorking = false;
-            }
-        }
     }
 
     /** Distance as text, or "--" when there isn't one. */

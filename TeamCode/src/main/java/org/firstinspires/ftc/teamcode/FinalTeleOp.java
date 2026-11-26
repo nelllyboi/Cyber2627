@@ -17,9 +17,21 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter;
  *   Left stick X    - strafe
  *   Right stick X   - turn (capped at TURN_CAP)
  *   Right bumper    - hold for slow mode (SLOW_MODE)
- *   Left trigger    - INTAKE: intake + transfer on, ball block closed (balls held)
- *   Right trigger   - SHOOT: flywheel to TELEOP_SHOT_RPM, feeds only once the
- *                     flywheel is ready. Both triggers held = shoot.
+ *   Left trigger    - INTAKE: intake + transfer on
+ *   Right trigger   - SHOOT: flywheel to TELEOP_SHOT_RPM; intake/transfer feed
+ *                     only once the flywheel is ready
+ *   Both triggers   - SHOOT + TRANSFER: flywheel and intake/transfer all on
+ *   A               - ball block OPEN
+ *   B               - ball block CLOSED
+ *                     The ball block is ONLY moved by A/B (starts CLOSED at START).
+ *   Dpad Up / Down  - shot RPM +/- RPM_STEP (between 0 and TELEOP_MAX_RPM)
+ *   Dpad Left       - reset shot RPM to TELEOP_SHOT_RPM
+ *   Y               - toggle flywheel spinning at shot RPM without holding RT
+ *                     (no feeding; for PIDF tuning and pre-spinning)
+ *
+ * PIDF tuning (same as the Nov 11 TeleOp): open FTC Dashboard
+ * (http://192.168.43.1:8080/dash), graph Target RPM / Current RPM / Error RPM,
+ * and edit kP/kS/kV/kA under FlywheelPIDF in the Configuration tab (save each edit).
  *
  * Driving is robot-centric: forward is always the way the robot faces.
  *   Rumble          - short buzz when the shooter becomes ready
@@ -34,7 +46,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 @TeleOp(name = "Final TeleOp", group = "Competition")
 public class FinalTeleOp extends LinearOpMode {
 
-    private enum IntakeState { IDLE, INTAKING, SHOOTING_WAITING, SHOOTING_FEEDING }
+    private enum IntakeState { IDLE, INTAKING, SHOOTING_WAITING, SHOOTING_FEEDING, SHOOT_AND_TRANSFER }
 
     private Drivetrain drivetrain;
     private Intake intake;
@@ -43,9 +55,15 @@ public class FinalTeleOp extends LinearOpMode {
     // Driver 1 state
     private boolean slowMode = false;
     private IntakeState intakeState = IntakeState.IDLE;
+    private boolean blockOpen = false; // ball block: A = open, B = closed
+    private double shotRpm = Constants.TELEOP_SHOT_RPM; // changed with dpad up/down/left
 
     // Previous-loop values, for edge detection (react to the change, not every loop)
     private boolean prevShooterReady = false;
+    private boolean prevDpadUp = false;
+    private boolean prevDpadDown = false;
+    private boolean prevY = false;
+    private boolean flywheelToggle = false; // Y: keep the flywheel spinning without RT
 
     @Override
     public void runOpMode() {
@@ -80,7 +98,23 @@ public class FinalTeleOp extends LinearOpMode {
 
     private void handleDriver1() {
         driveFromSticks();
+        adjustShotRpm();
         intakeAndShoot();
+    }
+
+    /** Dpad up/down: shot RPM +/- RPM_STEP (once per press). Dpad left: reset. */
+    private void adjustShotRpm() {
+        if (gamepad1.dpad_up && !prevDpadUp) {
+            shotRpm = Math.min(shotRpm + Constants.RPM_STEP, Constants.TELEOP_MAX_RPM);
+        }
+        if (gamepad1.dpad_down && !prevDpadDown) {
+            shotRpm = Math.max(shotRpm - Constants.RPM_STEP, 0);
+        }
+        if (gamepad1.dpad_left) {
+            shotRpm = Constants.TELEOP_SHOT_RPM;
+        }
+        prevDpadUp = gamepad1.dpad_up;
+        prevDpadDown = gamepad1.dpad_down;
     }
 
     private void driveFromSticks() {
@@ -90,6 +124,9 @@ public class FinalTeleOp extends LinearOpMode {
         double forward = shape(-gamepad1.left_stick_y);
         double strafe  = shape(gamepad1.left_stick_x);
         double turn    = shape(gamepad1.right_stick_x) * Constants.TURN_CAP;
+        if (Constants.INVERT_FORWARD) forward = -forward;
+        if (Constants.INVERT_STRAFE)  strafe  = -strafe;
+        if (Constants.INVERT_TURN)    turn    = -turn;
 
         if (slowMode) {
             forward *= Constants.SLOW_MODE;
@@ -101,30 +138,48 @@ public class FinalTeleOp extends LinearOpMode {
     }
 
     private void intakeAndShoot() {
+        // Y: toggle the flywheel on/off (spins at shot RPM, never feeds by itself)
+        if (gamepad1.y && !prevY) {
+            flywheelToggle = !flywheelToggle;
+        }
+        prevY = gamepad1.y;
+
         boolean shootHeld  = gamepad1.right_trigger > Constants.TRIGGER_THRESHOLD;
         boolean intakeHeld = gamepad1.left_trigger  > Constants.TRIGGER_THRESHOLD;
 
-        if (shootHeld) {
-            // Shooting wins if both triggers are held.
-            shooter.setTargetRpm(Constants.TELEOP_SHOT_RPM);
+        // Ball block: ONLY A and B move it. The triggers never touch it.
+        if (gamepad1.a) {
+            blockOpen = true;
+        } else if (gamepad1.b) {
+            blockOpen = false;
+        }
+        if (blockOpen) {
+            shooter.openBallBlock();
+        } else {
+            shooter.closeBallBlock();
+        }
+
+        if (shootHeld && intakeHeld) {
+            // Flywheel and intake/transfer both on at full power.
+            shooter.setTargetRpm(shotRpm);
+            intake.intake();
+            intakeState = IntakeState.SHOOT_AND_TRANSFER;
+        } else if (shootHeld) {
+            // Flywheel on; intake/transfer feed only once the flywheel is ready.
+            shooter.setTargetRpm(shotRpm);
             if (shooter.isReady()) {
-                shooter.openBallBlock();
                 intake.feed();
                 intakeState = IntakeState.SHOOTING_FEEDING;
             } else {
-                // Wait at speed-up with balls held back; feeding starts by itself once ready.
-                shooter.closeBallBlock();
                 intake.stopFeed();
                 intakeState = IntakeState.SHOOTING_WAITING;
             }
         } else if (intakeHeld) {
-            shooter.stop();
-            shooter.closeBallBlock();
+            spinOrStopFlywheel();
             intake.intake();
             intakeState = IntakeState.INTAKING;
         } else {
-            shooter.stop();
-            shooter.closeBallBlock();
+            spinOrStopFlywheel();
             intake.stopFeed();
             intakeState = IntakeState.IDLE;
         }
@@ -135,6 +190,15 @@ public class FinalTeleOp extends LinearOpMode {
             gamepad1.rumble(Constants.READY_RUMBLE_MS);
         }
         prevShooterReady = ready;
+    }
+
+    /** With no RT held: keep spinning if Y toggled the flywheel on, otherwise stop it. */
+    private void spinOrStopFlywheel() {
+        if (flywheelToggle) {
+            shooter.setTargetRpm(shotRpm);
+        } else {
+            shooter.stop();
+        }
     }
 
     // ---------------------------------------------------------------------
@@ -160,16 +224,39 @@ public class FinalTeleOp extends LinearOpMode {
         telemetry.addData("Drive mode", "ROBOT-CENTRIC");
         telemetry.addData("Slow mode", slowMode ? "ON" : "OFF");
         telemetry.addData("Intake state", intakeState);
+        telemetry.addData("Shot RPM (dpad)", shotRpm);
         telemetry.addData("Target RPM", shooter.getTargetRpm());
         telemetry.addData("Current RPM", shooter.getCurrentRpm());
+        telemetry.addData("Flywheel on (Y)", flywheelToggle);
+        // Plain numbers (no format strings) so FTC Dashboard can graph them
+        telemetry.addData("Error RPM", shooter.getTargetRpm() > 0
+                ? shooter.getTargetRpm() - shooter.getCurrentRpm() : 0);
+        telemetry.addData("Flywheel current (A)", shooter.getFlywheelCurrent());
+        telemetry.addData("Encoder (ticks/s)", shooter.getEncoderTicksPerSec());
+        telemetry.addData("Encoder position (ticks)", shooter.getEncoderPosition());
+        telemetry.addData("Flywheel power", shooter.getPower());
+        telemetry.addData("Battery (V)", shooter.getBatteryVoltage());
+
+        // Flywheel tuning constants (FlywheelPIDF + Constants)
+        telemetry.addData("kP", FlywheelPIDF.kP);
+        telemetry.addData("kI", FlywheelPIDF.kI);
+        telemetry.addData("kD", FlywheelPIDF.kD);
+        telemetry.addData("kS", FlywheelPIDF.kS);
+        telemetry.addData("kV", FlywheelPIDF.kV);
+        telemetry.addData("kA", FlywheelPIDF.kA);
+        telemetry.addData("Ticks per rev", FlywheelPIDF.TICKS_PER_REV);
+        telemetry.addData("Nominal voltage", Constants.NOMINAL_VOLTAGE);
+        telemetry.addData("RPM tolerance", Constants.RPM_TOLERANCE);
+        telemetry.addData("Ready hold (s)", Constants.READY_HOLD_SEC);
         telemetry.addData("Shooter ready", shooter.isReady());
-        telemetry.addData("Ball block", intakeState == IntakeState.SHOOTING_FEEDING
+        telemetry.addData("Ball block", blockOpen
                 ? "OPEN (" + Constants.BALL_BLOCK_OPEN + ")"
                 : "CLOSED (" + Constants.BALL_BLOCK_CLOSED + ")");
         telemetry.addData("Wheels FL/FR/BL/BR", "%.2f / %.2f / %.2f / %.2f",
                 drivetrain.getFrontLeftPower(), drivetrain.getFrontRightPower(),
                 drivetrain.getBackLeftPower(), drivetrain.getBackRightPower());
-        telemetry.addLine("LS=drive/strafe  RS X=turn  RB=slow  LT=intake  RT=shoot");
+        telemetry.addLine("LS=drive/strafe  RS X=turn  RB=slow  LT=intake  RT=shoot  LT+RT=shoot+transfer  A=block open  B=block closed  Dpad U/D=RPM  Dpad L=reset RPM  Y=flywheel on/off");
         telemetry.update();
+
     }
 }

@@ -12,15 +12,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
  * which hub/port it is mapped to, so a dead motor can be traced to wiring vs config.
  *
  * Controls (gamepad1):
- *   Hold A       - run transferMotor only
- *   Hold B       - run transferMotor2 only
+ *   Hold A       - run transfer1 only
+ *   Hold B       - run transfer2 only
  *   Dpad Up/Down - raise / lower test power by POWER_STEP
  */
 @TeleOp(name = "Transfer Motor Test", group = "Test")
 public class TransferMotorTest extends LinearOpMode {
 
-    private static final String TRANSFER_NAME  = "transferMotor";
-    private static final String TRANSFER2_NAME = "transferMotor2";
+    private static final String TRANSFER_NAME  = "transfer1";
+    private static final String TRANSFER2_NAME = "transfer2";
 
     private static final double START_POWER = 0.3;
     private static final double POWER_STEP  = 0.1;
@@ -39,7 +39,7 @@ public class TransferMotorTest extends LinearOpMode {
 
         telemetry.addData(TRANSFER_NAME, transfer.getConnectionInfo());
         telemetry.addData(TRANSFER2_NAME, transfer2.getConnectionInfo());
-        telemetry.addLine("Hold A = transferMotor, hold B = transferMotor2");
+        telemetry.addLine("Hold A = transfer1, hold B = transfer2");
         telemetry.update();
 
         waitForStart();

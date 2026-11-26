@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.noahswork;
 
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -17,25 +17,21 @@ import org.firstinspires.ftc.teamcode.subsystems.HiveVision;
  * (along the floor) to check LimelightConstants. "Angle distance" is a backup shown
  * for comparison only.
  *
- * Telemetry goes to the Driver Station and is mirrored to Panels (http://192.168.43.1:8001).
- * In Panels' Graph widget these numbers can be plotted live:
+ * Telemetry goes to the Driver Station and FTC Dashboard (http://192.168.43.1:8080/dash).
+ * In Dashboard's Graph these numbers can be plotted live:
  *   poseDistance, angleDistance   - the two distance methods, to compare
  *   tagForward, tagRight, tagUp   - where the tag is relative to the camera, in inches
- * LimelightConstants can be tuned in Panels' Configurables tab.
+ * LimelightConstants can be tuned in Dashboard's Configuration tab.
  */
 @TeleOp(name = "Hive Distance Test", group = "Test")
 public class HiveDistanceTest extends LinearOpMode {
 
-    private TelemetryManager panels;
-    private boolean panelsWorking = true;  // turned off if Panels ever throws, so the test keeps running
-
     @Override
     public void runOpMode() {
         HiveVision vision = new HiveVision(hardwareMap, HiveVision.Alliance.ANY);
-        try {
-            panels = PanelsTelemetry.INSTANCE.getTelemetry();
-        } catch (Exception e) {
-            panelsWorking = false;
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        if (dashboard != null) {
+            telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
         }
 
         // The Limelight is only a camera, so updating it in INIT is fine.
@@ -66,8 +62,7 @@ public class HiveDistanceTest extends LinearOpMode {
             double ms = vision.getMsSinceLastReading();
             show("Since last reading (ms)", ms < 0 ? "never" : String.format("%.0f", ms));
 
-            // Numbers for Panels' Graph widget. Graph reads lines shaped "name: number",
-            // so these use short names with no spaces and are skipped when there is no reading.
+            // Plain numbers for FTC Dashboard's graph, skipped when there is no reading.
             graph("poseDistance", vision.getRawDistanceInches());
             graph("angleDistance", vision.getAngleDistanceInches());
             graph("tagForward", vision.getTagForwardInches());
@@ -80,40 +75,25 @@ public class HiveDistanceTest extends LinearOpMode {
         vision.stop();
     }
 
-    // --- Telemetry helpers: Driver Station first, Panels as an extra ---
+    // --- Telemetry helpers (Driver Station + FTC Dashboard) ---
 
-    /** One line on the Driver Station and in Panels. */
     private void show(String caption, Object value) {
         telemetry.addData(caption, value);
-        if (panelsWorking) panels.addData(caption, value);
     }
 
-    /** A number for Panels' Graph widget only, skipped when there is no reading (NaN). */
+    /** A plain number for FTC Dashboard's graph, skipped when there is no reading (NaN). */
     private void graph(String name, double value) {
-        if (panelsWorking && !Double.isNaN(value)) panels.addData(name, value);
+        if (!Double.isNaN(value)) telemetry.addData(name, value);
     }
 
-    /**
-     * Sends this loop's lines. The Driver Station is updated on its own, so a problem
-     * in Panels can never freeze or blank the Driver Station.
-     */
     private void sendTelemetry() {
-        if (!panelsWorking) telemetry.addLine("Panels not working, Driver Station only");
         telemetry.update();
-        if (panelsWorking) {
-            try {
-                panels.update();
-            } catch (Exception e) {
-                panelsWorking = false;
-            }
-        }
     }
 
     private void addNoPoseWarning(HiveVision vision) {
         if (vision.isTagSeenWithoutPose()) {
             String warning = "Tag seen but no 3D pose: turn on full 3D in the Limelight pipeline";
             telemetry.addLine(warning);
-            if (panelsWorking) panels.addLine(warning);
         }
     }
 

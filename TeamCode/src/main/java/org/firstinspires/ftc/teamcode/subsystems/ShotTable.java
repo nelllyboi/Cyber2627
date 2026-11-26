@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.bylazar.configurables.annotations.Configurable;
+import com.acmerobotics.dashboard.config.Config;
 
 /**
  * Turns a Limelight distance into a flywheel target RPM.
@@ -16,10 +16,10 @@ import com.bylazar.configurables.annotations.Configurable;
  *   3. Write down "Distance (in)" and "Target RPM" from telemetry as one row.
  *   4. Repeat at 4-6 distances across your shooting range, closest first.
  *
- * Both arrays show up in Panels' Configurables tab for live editing, but copy
+ * Both arrays show up in FTC Dashboard's Configuration tab for live editing, but copy
  * final values back here so they survive a restart.
  */
-@Configurable
+@Config
 public class ShotTable {
 
     // TODO measure: PLACEHOLDER values. Replace every row with real test data.

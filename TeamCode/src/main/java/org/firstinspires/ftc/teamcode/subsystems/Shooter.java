@@ -101,4 +101,8 @@ public class Shooter {
     public double getTargetRpm() { return targetRpm; }
     public double getCurrentRpm() { return currentRpm; }
     public double getPower() { return power; }
+    public double getEncoderTicksPerSec() { return flywheel.getTicksPerSecond(); }
+    public int getEncoderPosition() { return flywheel.getEncoderPosition(); }
+    public double getBatteryVoltage() { return battery.getVoltage(); }
+    public double getFlywheelCurrent() { return flywheel.getCurrent(); }
 }

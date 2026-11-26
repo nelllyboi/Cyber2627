@@ -54,8 +54,8 @@ public class FlywheelPIDF {
     public static double kD = 0.0;
 
     // Feedforward gains
-    public static double kS = 0.0869777521;   // static friction (power)
-    public static double kV = 0.000178;       // velocity feedforward (power / RPM)
+    public static double kS = 0.341036;   // static friction (power)
+    public static double kV = 0.00017;       // velocity feedforward (power / RPM)
     public static double kA = 0;              // acceleration feedforward (per-loop change in target RPM)
 
     /** Dual-motor flywheel. */
@@ -129,6 +129,16 @@ public class FlywheelPIDF {
                     + flywheel2.getCurrent(CurrentUnit.AMPS)) / 2.0;
         }
         return flywheel.getCurrent(CurrentUnit.AMPS);
+    }
+
+    /** Raw encoder velocity in ticks per second (same sign as getRPM()). */
+    public double getTicksPerSecond() {
+        return -flywheel.getVelocity();
+    }
+
+    /** Raw encoder position in ticks (counts since the hub started). */
+    public int getEncoderPosition() {
+        return flywheel.getCurrentPosition();
     }
 
     public double getRPM() {

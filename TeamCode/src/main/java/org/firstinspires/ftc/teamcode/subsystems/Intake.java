@@ -36,19 +36,19 @@ public class Intake {
         transfer2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    /** Collect balls: intake + both transfer motors at full power. */
+    /** Collect balls: intake at full power, both transfer motors at TRANSFER_SPEED. */
     public void intake() {
         intake.setPower(Math.signum(Constants.INTAKE_POWER));
-        transfer.setPower(Math.signum(Constants.TRANSFER_POWER));
-        transfer2.setPower(Math.signum(Constants.TRANSFER2_POWER));
+        transfer.setPower(Math.signum(Constants.TRANSFER_POWER) * Constants.TRANSFER_SPEED);
+        transfer2.setPower(Math.signum(Constants.TRANSFER2_POWER) * Constants.TRANSFER_SPEED);
         feeding = false;
     }
 
-    /** Run intake + both transfer motors at FEED_POWER to push a ball into the shooter. */
+    /** Push balls into the shooter: intake at FEED_POWER, transfer motors at TRANSFER_SPEED. */
     public void feed() {
         intake.setPower(Math.signum(Constants.INTAKE_POWER) * Constants.FEED_POWER);
-        transfer.setPower(Math.signum(Constants.TRANSFER_POWER) * Constants.FEED_POWER);
-        transfer2.setPower(Math.signum(Constants.TRANSFER2_POWER) * Constants.FEED_POWER);
+        transfer.setPower(Math.signum(Constants.TRANSFER_POWER) * Constants.TRANSFER_SPEED);
+        transfer2.setPower(Math.signum(Constants.TRANSFER2_POWER) * Constants.TRANSFER_SPEED);
         feeding = true;
     }
 

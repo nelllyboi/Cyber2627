@@ -1,12 +1,11 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.bylazar.configurables.annotations.Configurable;
 
 /**
  * Every tunable value for the Limelight 3A and hive distance detection.
  *
- * The non-final values show up in Panels' Configurables tab and in FTC Dashboard's
+ * The non-final values show up in FTC Dashboard's
  * Configuration tab under LimelightConstants, so they can be adjusted live.
  * Changes made there are lost on restart: copy final values back into this file.
  *
@@ -14,7 +13,6 @@ import com.bylazar.configurables.annotations.Configurable;
  * Distances will be wrong until they are.
  */
 @Config
-@Configurable
 public class LimelightConstants {
 
     // --- Hardware / pipeline (final, not shown in Dashboard) ---
