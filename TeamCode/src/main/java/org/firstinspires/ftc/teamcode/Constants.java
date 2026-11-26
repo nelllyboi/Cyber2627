@@ -23,15 +23,17 @@ public class Constants {
     // --- Drivetrain directions ---
     // TODO check on blocks: pushing forward should spin every wheel forward.
     // Flip the one that's wrong. Usually one whole side is reversed.
-    public static boolean FRONT_LEFT_REVERSED  = false;
-    public static boolean BACK_LEFT_REVERSED   = false;
-    public static boolean FRONT_RIGHT_REVERSED = true;
-    public static boolean BACK_RIGHT_REVERSED  = true;
+    // Same directions as the Pedro Mecanum Tuner result (pedro/Constants.drivetrainConfig).
+    public static boolean FRONT_LEFT_REVERSED  = true;
+    public static boolean BACK_LEFT_REVERSED   = true;
+    public static boolean FRONT_RIGHT_REVERSED = false;
+    public static boolean BACK_RIGHT_REVERSED  = false;
 
-    // Stick direction fixes for TeleOp (flip any that drive the wrong way).
-    public static boolean INVERT_FORWARD = true;
-    public static boolean INVERT_STRAFE  = true;
-    public static boolean INVERT_TURN    = true;
+    // Stick direction fixes for TeleOp. Off now that the back motor wires are fixed;
+    // flip one only if that stick drives the wrong way.
+    public static boolean INVERT_FORWARD = false;
+    public static boolean INVERT_STRAFE  = false;
+    public static boolean INVERT_TURN    = false;
 
     // --- Driver 1 controls ---
     public static double DEADZONE          = 0.1;  // stick values smaller than this count as 0
