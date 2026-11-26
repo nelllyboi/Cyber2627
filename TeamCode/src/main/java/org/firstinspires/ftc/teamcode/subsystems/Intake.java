@@ -52,6 +52,17 @@ public class Intake {
         feeding = true;
     }
 
+    /** Manual control: intake motor at full power (INTAKE_POWER direction) or off. */
+    public void setIntake(boolean on) {
+        intake.setPower(on ? Math.signum(Constants.INTAKE_POWER) : 0);
+    }
+
+    /** Manual control: both transfer motors at TRANSFER_SPEED or off. */
+    public void setTransfer(boolean on) {
+        transfer.setPower(on ? Math.signum(Constants.TRANSFER_POWER) * Constants.TRANSFER_SPEED : 0);
+        transfer2.setPower(on ? Math.signum(Constants.TRANSFER2_POWER) * Constants.TRANSFER_SPEED : 0);
+    }
+
     public void stopFeed() {
         intake.setPower(0);
         transfer.setPower(0);

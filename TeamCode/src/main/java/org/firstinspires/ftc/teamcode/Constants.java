@@ -42,7 +42,7 @@ public class Constants {
     // --- Ball block servo ---
     // Used by FinalTeleOp, BallBlockTest (A/B buttons) and BiobuzzAuto.
     public static double BALL_BLOCK_OPEN   = 0.47;  // balls can pass into the flywheel
-    public static double BALL_BLOCK_CLOSED = 0.60;  // balls are held back
+    public static double BALL_BLOCK_CLOSED = 0.85;  // balls are held back
 
     // --- Flywheel ---
     public static double RPM_STEP  = 100;   // RPM change per dpad press

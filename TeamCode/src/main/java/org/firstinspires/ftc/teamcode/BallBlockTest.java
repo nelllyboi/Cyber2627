@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.Servo;
  * BLOCK_MAX below. TeleOpTest reads those two constants.
  *
  * Gamepad 1: A moves the servo to Constants.BALL_BLOCK_OPEN (0.47),
- * B to Constants.BALL_BLOCK_CLOSED (0.60).
+ * B to Constants.BALL_BLOCK_CLOSED (0.65).
  */
 @Config
 @TeleOp(name = "Ball Block Test", group = "Test")
@@ -26,7 +26,7 @@ public class BallBlockTest extends OpMode {
     public static final String BALL_BLOCK_NAME = "ballBlock";
 
     // --- Saved positions used by TeleOpTest ---
-    public static double BLOCK_MIN = 0.60;   // blocking position (same as Constants.BALL_BLOCK_CLOSED)
+    public static double BLOCK_MIN = 0.65;   // blocking position (same as Constants.BALL_BLOCK_CLOSED)
     public static double BLOCK_MAX = 0.47;  // open position (same as Constants.BALL_BLOCK_OPEN)
 
     // --- Live tuning position (edit in Dashboard, or set with A/B) ---
