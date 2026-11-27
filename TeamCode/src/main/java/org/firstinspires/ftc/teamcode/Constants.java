@@ -91,6 +91,6 @@ public class Constants {
 
     // --- TeleOp shooting ---
     public static double TELEOP_MAX_RPM  = 2600;  // dpad cap; real top speed ~2600-2700 at 12.4-12.5 V
-    public static double TELEOP_SHOT_RPM = 1620;  // TODO tune: fixed RPM while left trigger is held
+    public static double TELEOP_SHOT_RPM = 2200;  // shot RPM at START and on Dpad Left (tested 2026-11-26)
     public static int    READY_RUMBLE_MS = 200;   // rumble length when the shooter becomes ready
 }
