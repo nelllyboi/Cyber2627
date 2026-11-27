@@ -198,6 +198,15 @@ public class FinalTeleOp extends LinearOpMode {
     }
 
     private void sendTelemetry() {
+        telemetry.addData("Flywheel mode", shooter.getMode());
+        telemetry.addData("Current RPM", shooter.getCurrentRpm());
+        // Shot meter: shoot one ball, read these three
+        telemetry.addData("LAST SHOT lowest RPM", shooter.getLastLowestRpm());
+        telemetry.addData("LAST SHOT recovery (s)", shooter.getLastRecoverSec());
+        telemetry.addData("LAST SHOT overshoot (RPM)", shooter.getLastOvershootRpm());
+        telemetry.addData("LAST SHOT full power (s)", shooter.getLastBangSec());
+        telemetry.addData("Bang-bang triggers", shooter.getBangTriggers());
+        telemetry.addData("Shots measured", shooter.getShotsMeasured());
         telemetry.addData("Drive mode", "ROBOT-CENTRIC");
         telemetry.addData("Slow mode", slowMode ? "ON" : "OFF");
         telemetry.addData("Intake (LT)", intakeOn ? "ON" : "off");
@@ -205,7 +214,6 @@ public class FinalTeleOp extends LinearOpMode {
         telemetry.addData("Flywheel (RT / Y)", flywheelOn ? "ON" : "off");
         telemetry.addData("Shot RPM (dpad)", shotRpm);
         telemetry.addData("Target RPM", shooter.getTargetRpm());
-        telemetry.addData("Current RPM", shooter.getCurrentRpm());
         telemetry.addData("Flywheel on (Y)", flywheelToggle);
         // Plain numbers (no format strings) so FTC Dashboard can graph them
         telemetry.addData("Error RPM", shooter.getTargetRpm() > 0
@@ -227,6 +235,9 @@ public class FinalTeleOp extends LinearOpMode {
         telemetry.addData("Nominal voltage", Constants.NOMINAL_VOLTAGE);
         telemetry.addData("RPM tolerance", Constants.RPM_TOLERANCE);
         telemetry.addData("Ready hold (s)", Constants.READY_HOLD_SEC);
+        telemetry.addData("Bang-bang on", Constants.USE_BANG_BANG);
+        telemetry.addData("Bang-bang enter (RPM below)", Constants.BANG_BANG_ENTER_RPM);
+        telemetry.addData("Bang-bang exit (RPM below)", Constants.BANG_BANG_EXIT_RPM);
         telemetry.addData("Shooter ready", shooter.isReady());
         telemetry.addData("Ball block", blockOpen
                 ? "OPEN (" + Constants.BALL_BLOCK_OPEN + ")"

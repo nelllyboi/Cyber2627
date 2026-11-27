@@ -19,6 +19,8 @@ dependencies {
     implementation 'com.acmerobotics.dashboard:dashboard:0.5.1'
     implementation 'com.pedropathing:revhub:3.0.2' // Pedro Pathing 3
     // Pedro AutoTune, http://192.168.43.1:10158. Brings in Sloth, which stops FTC Dashboard
-    // Configuration edits from reaching OpModes; remove this line again for flywheel tuning.
-    implementation 'com.pedropathing:tuning:1.0.3'
+    // Configuration edits from reaching OpModes. DISABLED for flywheel tuning.
+    // To turn AutoTune back on: uncomment this line and move TeamCode/pedro-tuning-disabled/*
+    // back into TeamCode/src/main/java/org/firstinspires/ftc/teamcode/pedro/.
+    // implementation 'com.pedropathing:tuning:1.0.3'
 }

@@ -65,8 +65,22 @@ public class Constants {
     public static double RPM_TOLERANCE   = 75;   // TODO measure: |target - actual| counted as "at speed"
     public static double READY_HOLD_SEC  = 0.12; // must stay at speed this long before feeding
 
+    // Bang-bang + PIDF hybrid with two thresholds (so it doesn't flicker):
+    //   RPM drops more than ENTER below target -> full power (1.0)
+    //   RPM climbs to within EXIT of target     -> back to PIDF
+    //   in between                              -> keep doing whatever it was doing
+    // Bang-bang only pushes forward, never brakes. Keep ENTER > EXIT.
+    public static boolean USE_BANG_BANG     = true;
+    public static double BANG_BANG_ENTER_RPM = 80; // tuned 2026-11-26 (shots dip ~130 RPM, so every shot triggers it)
+    public static double BANG_BANG_EXIT_RPM  = 60; // tuned 2026-11-26: overshoot ~10 RPM (one encoder step)
+
+    // Shot meter (telemetry only): measures each shot's dip, recovery time and overshoot.
+    public static double SHOT_METER_DIP_RPM   = 100; // a drop bigger than this counts as a shot
+    public static double SHOT_METER_BACK_RPM  = 20;  // "recovered" = back within this of target
+    public static double SHOT_METER_WATCH_SEC = 0.5; // watch this long after recovering for overshoot
+
     // --- Auto shooting ---
-    public static double START_SHOT_RPM   = 2000; // TODO measure: RPM that scores from the start pose
+    public static double START_SHOT_RPM   = 1620; // TODO measure: RPM that scores from the start pose
     public static double SHOT_DIP_RPM     = 200;  // TODO measure: RPM drop below target that means a ball went through
     public static int    PRELOAD_COUNT    = 4;    // balls shot in auto (G407: never more than 4)
     public static double SPIN_UP_TIMEOUT  = 2.5;  // s, give up shooting and go park if never at speed
@@ -76,7 +90,7 @@ public class Constants {
     public static double AUTO_STOP_TIME   = 29.5; // s, everything stops by here (AUTO is 30 s)
 
     // --- TeleOp shooting ---
-    public static double TELEOP_MAX_RPM  = 6000;  // dpad can't raise the shot RPM above this
-    public static double TELEOP_SHOT_RPM = 2000;  // TODO tune: fixed RPM while left trigger is held
+    public static double TELEOP_MAX_RPM  = 2600;  // dpad cap; real top speed ~2600-2700 at 12.4-12.5 V
+    public static double TELEOP_SHOT_RPM = 1620;  // TODO tune: fixed RPM while left trigger is held
     public static int    READY_RUMBLE_MS = 200;   // rumble length when the shooter becomes ready
 }

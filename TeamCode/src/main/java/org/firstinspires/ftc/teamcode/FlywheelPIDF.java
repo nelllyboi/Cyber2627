@@ -30,9 +30,10 @@ public class FlywheelPIDF {
 
     private static final double MAX_INTEGRAL_SUM = 100;
 
-    // Encoder ticks per output revolution of the flywheel motor.
-    // 28 = bare goBILDA/REV motor encoder (counts per rev, no gearbox).
-    public static double TICKS_PER_REV = 28.0;
+    // Encoder ticks per FLYWHEEL revolution, so getRPM() is the real flywheel speed.
+    // goBILDA 1620 RPM motor: 28 ticks per motor rev x 3.7 gearbox = 103.8 ticks per output rev,
+    // then geared up 3x to the flywheel: 103.8 / 3 = 34.6 ticks per flywheel rev.
+    public static double TICKS_PER_REV = 34.6;
 
     public double wheelRad;
 
@@ -54,8 +55,8 @@ public class FlywheelPIDF {
     public static double kD = 0.0;
 
     // Feedforward gains
-    public static double kS = 0.341036;   // static friction (power)
-    public static double kV = 0.00017;       // velocity feedforward (power / RPM)
+    public static double kS = 0.315475;   // static friction (power), Flywheel Characterize 2026-11-26 after dead-spot fix
+    public static double kV = 0.00027061; // velocity feedforward (power / flywheel RPM), same run, R² 0.9979
     public static double kA = 0;              // acceleration feedforward (per-loop change in target RPM)
 
     /** Dual-motor flywheel. */
