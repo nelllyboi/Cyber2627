@@ -11,6 +11,9 @@ public class Constants {
     public static final String TRANSFER2_NAME  = "transfer2";
     public static final String INTAKE_NAME     = "intake";
     public static final String BALL_BLOCK_NAME = "ballBlock";
+    // Flower intake bar servos (names from the Driver Station config)
+    public static final String FLOWER1_NAME = "flower1";
+    public static final String FLOWER2_NAME = "flower2";
 
     // TODO check: drive motor and Pinpoint names are placeholders. They must match
     // the Driver Station config exactly (case-sensitive).
@@ -79,8 +82,15 @@ public class Constants {
     public static double SHOT_METER_BACK_RPM  = 20;  // "recovered" = back within this of target
     public static double SHOT_METER_WATCH_SEC = 0.5; // watch this long after recovering for overshoot
 
+    // Kalman filter on the flywheel RPM reading (smooths the ~35 RPM encoder steps).
+    // When on, PIDF, bang-bang, "ready" and the shot meter all use the filtered RPM.
+    // More smoothing = more lag (bang-bang notices a dip later), so test bursts with it on.
+    public static boolean USE_KALMAN = false; // off = exactly the tuned behavior
+    public static double KALMAN_Q = 100;      // bigger = follows changes faster, less smoothing
+    public static double KALMAN_R = 100;      // bigger = more smoothing, more lag
+
     // --- Auto shooting ---
-    public static double START_SHOT_RPM   = 1620; // TODO measure: RPM that scores from the start pose
+    public static double START_SHOT_RPM   = 2200; // same as TeleOp shot RPM; TODO check it scores from the auto start pose
     public static double SHOT_DIP_RPM     = 200;  // TODO measure: RPM drop below target that means a ball went through
     public static int    PRELOAD_COUNT    = 4;    // balls shot in auto (G407: never more than 4)
     public static double SPIN_UP_TIMEOUT  = 2.5;  // s, give up shooting and go park if never at speed
@@ -93,4 +103,7 @@ public class Constants {
     public static double TELEOP_MAX_RPM  = 2600;  // dpad cap; real top speed ~2600-2700 at 12.4-12.5 V
     public static double TELEOP_SHOT_RPM = 2200;  // shot RPM at START and on Dpad Left (tested 2026-11-26)
     public static int    READY_RUMBLE_MS = 200;   // rumble length when the shooter becomes ready
+    // Show every motor's current (amps) in FinalTeleOp. Each read slows the loop a few ms,
+    // so turn this off for matches.
+    public static boolean SHOW_MOTOR_CURRENT = true;
 }

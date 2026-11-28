@@ -31,7 +31,10 @@ public class Shooter {
     private boolean wasAtSpeed = false;
 
     private double targetRpm = 0;
-    private double currentRpm = 0;
+    private double currentRpm = 0; // RPM used for control (filtered if USE_KALMAN is on)
+    private double rawRpm = 0;     // RPM straight from the encoder
+    private final KalmanFilter1D rpmFilter = new KalmanFilter1D();
+    private boolean wasSpinning = false;
     private double power = 0;
     private String mode = "OFF"; // OFF, BANG-BANG or PIDF
     private boolean bangActive = false; // remembered between loops for the enter/exit thresholds
@@ -68,7 +71,18 @@ public class Shooter {
 
     /** Run the velocity controller. Call once per loop. */
     public void update() {
-        currentRpm = flywheel.getRPM();
+        rawRpm = flywheel.getRPM();
+        if (Constants.USE_KALMAN) {
+            // Start the filter at the real reading when the flywheel turns on, so it doesn't lag from 0.
+            if (targetRpm > 0 && !wasSpinning) {
+                rpmFilter.reset(rawRpm);
+            }
+            currentRpm = rpmFilter.update(rawRpm, Constants.KALMAN_Q, Constants.KALMAN_R);
+        } else {
+            rpmFilter.reset(rawRpm); // keep it ready to switch on without a jump
+            currentRpm = rawRpm;
+        }
+        wasSpinning = targetRpm > 0;
 
         if (targetRpm <= 0) {
             power = 0;
@@ -189,6 +203,10 @@ public class Shooter {
 
     public double getTargetRpm() { return targetRpm; }
     public double getCurrentRpm() { return currentRpm; }
+    /** RPM straight from the encoder, before the Kalman filter. */
+    public double getRawRpm() { return rawRpm; }
+    /** Kalman gain K (0-1): how much each new reading counts. 0 when the filter is off. */
+    public double getKalmanGain() { return Constants.USE_KALMAN ? rpmFilter.getGain() : 0; }
     public double getPower() { return power; }
     /** Which controller ran this loop: OFF, BANG-BANG or PIDF. */
     public String getMode() { return mode; }

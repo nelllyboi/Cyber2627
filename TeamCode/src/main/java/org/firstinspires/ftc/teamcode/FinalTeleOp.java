@@ -199,7 +199,11 @@ public class FinalTeleOp extends LinearOpMode {
 
     private void sendTelemetry() {
         telemetry.addData("Flywheel mode", shooter.getMode());
+        telemetry.addData("Bang-bang active (1/0)", "BANG-BANG".equals(shooter.getMode()) ? 1 : 0); // number so Dashboard can graph it
         telemetry.addData("Current RPM", shooter.getCurrentRpm());
+        telemetry.addData("Raw RPM", shooter.getRawRpm());
+        telemetry.addData("Kalman on", Constants.USE_KALMAN);
+        telemetry.addData("Kalman gain", shooter.getKalmanGain());
         // Shot meter: shoot one ball, read these three
         telemetry.addData("LAST SHOT lowest RPM", shooter.getLastLowestRpm());
         telemetry.addData("LAST SHOT recovery (s)", shooter.getLastRecoverSec());
@@ -223,6 +227,27 @@ public class FinalTeleOp extends LinearOpMode {
         telemetry.addData("Encoder position (ticks)", shooter.getEncoderPosition());
         telemetry.addData("Flywheel power", shooter.getPower());
         telemetry.addData("Battery (V)", shooter.getBatteryVoltage());
+
+        // Current draw of every motor (amps). Plain numbers so Dashboard can graph them.
+        if (Constants.SHOW_MOTOR_CURRENT) {
+            double fl = drivetrain.getFrontLeftCurrent();
+            double fr = drivetrain.getFrontRightCurrent();
+            double bl = drivetrain.getBackLeftCurrent();
+            double br = drivetrain.getBackRightCurrent();
+            double in = intake.getIntakeCurrent();
+            double t1 = intake.getTransfer1Current();
+            double t2 = intake.getTransfer2Current();
+            double fw = shooter.getFlywheelCurrent();
+            telemetry.addData("Amps frontLeft", fl);
+            telemetry.addData("Amps frontRight", fr);
+            telemetry.addData("Amps backLeft", bl);
+            telemetry.addData("Amps backRight", br);
+            telemetry.addData("Amps intake", in);
+            telemetry.addData("Amps transfer1", t1);
+            telemetry.addData("Amps transfer2", t2);
+            telemetry.addData("Amps shooter", fw);
+            telemetry.addData("Amps TOTAL", fl + fr + bl + br + in + t1 + t2 + fw);
+        }
 
         // Flywheel tuning constants (FlywheelPIDF + Constants)
         telemetry.addData("kP", FlywheelPIDF.kP);

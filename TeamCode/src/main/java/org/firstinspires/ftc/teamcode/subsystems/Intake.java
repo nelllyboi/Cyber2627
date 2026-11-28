@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 import org.firstinspires.ftc.teamcode.Constants;
 
 /**
@@ -73,4 +75,9 @@ public class Intake {
     public boolean isFeeding() {
         return feeding;
     }
+
+    // Motor current draw in amps (each read takes a few ms, so only call when shown).
+    public double getIntakeCurrent()    { return intake.getCurrent(CurrentUnit.AMPS); }
+    public double getTransfer1Current() { return transfer.getCurrent(CurrentUnit.AMPS); }
+    public double getTransfer2Current() { return transfer2.getCurrent(CurrentUnit.AMPS); }
 }
